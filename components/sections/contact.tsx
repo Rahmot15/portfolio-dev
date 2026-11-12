@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
+import emailjs, { EmailJSResponseStatus } from "@emailjs/browser";
 import { useState, type FormEvent } from "react";
 import { SiWhatsapp } from "react-icons/si";
 import { TbArrowRight, TbArrowUpRight, TbCheck, TbDownload, TbPhone } from "react-icons/tb";
@@ -20,7 +21,8 @@ const hoverLink = {
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", reason: "", message: "" });
   const [touched, setTouched] = useState(false);
-  const [sent, setSent] = useState<null | "email" | "whatsapp">(null);
+  const [sent, setSent] = useState<null | "email" | "whatsapp" | "sending" | "error">(null);
+  const [sendError, setSendError] = useState<string | null>(null);
   const sendRef = useMagnetic<HTMLButtonElement>(0.25);
 
   const errors = {
@@ -29,25 +31,66 @@ export default function Contact() {
     message: form.message.trim().length < 10 ? "A sentence or two, please" : "",
   };
   const valid = !errors.name && !errors.email && !errors.message;
+  const updateForm = (next: typeof form) => {
+    setForm(next);
+    if (sent) setSent(null);
+    setSendError(null);
+  };
 
-  const compose = (channel: "email" | "whatsapp") => {
+  const compose = async (channel: "email" | "whatsapp") => {
     setTouched(true);
     if (!valid) return;
     const name = form.name.trim();
     const subject = `${form.reason || "Hello"} — from ${name}`;
     if (channel === "email") {
-      const body = `Hi Rahmatullah,\n\n${form.message.trim()}\n\n— ${name}\n${form.email.trim()}`;
-      window.location.href = `mailto:${profile.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      const serviceId = process.env.NEXT_PUBLIC_SERVICE_ID;
+      const templateId = process.env.NEXT_PUBLIC_TEMPLATE_ID;
+      const publicKey = process.env.NEXT_PUBLIC_PUBLIC_KEY;
+
+      if (!serviceId || !templateId || !publicKey) {
+        setSent("error");
+        return;
+      }
+
+      setSent("sending");
+      setSendError(null);
+      try {
+        await emailjs.send(
+          serviceId,
+          templateId,
+          {
+            name,
+            email: form.email.trim(),
+            reply_to: form.email.trim(),
+            reason: form.reason || "Hello",
+            subject,
+            message: form.message.trim(),
+          },
+          { publicKey },
+        );
+        setSent("email");
+        setForm({ name: "", email: "", reason: "", message: "" });
+        setTouched(false);
+      } catch (error) {
+        const reconnectRequired =
+          error instanceof EmailJSResponseStatus && /invalid grant|insufficient authentication scopes/i.test(error.text);
+        setSendError(
+          reconnectRequired
+            ? "Email account needs reconnecting. Reconnect Gmail in EmailJS, then try again."
+            : null,
+        );
+        setSent("error");
+      }
     } else {
       const text = `${subject}\n\n${form.message.trim()}\n\n${name} · ${form.email.trim()}`;
       window.open(`https://wa.me/${profile.whatsapp}?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
+      setSent("whatsapp");
     }
-    setSent(channel);
   };
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
-    compose("email");
+    void compose("email");
   };
 
   const cells = [
@@ -168,7 +211,7 @@ export default function Contact() {
                 <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
                   <span className="mono-label">Send a message</span>
                   <span className="font-mono text-[0.58rem] tracking-[0.14em] text-muted uppercase">
-                    Opens your email or WhatsApp — prefilled
+                    Sends directly to email
                   </span>
                 </div>
 
@@ -176,7 +219,7 @@ export default function Contact() {
                   <Field
                     label="Your name ✳"
                     value={form.name}
-                    onChange={(v) => setForm({ ...form, name: v })}
+                    onChange={(v) => updateForm({ ...form, name: v })}
                     error={touched ? errors.name : ""}
                     placeholder="Jane Doe"
                     autoComplete="name"
@@ -185,7 +228,7 @@ export default function Contact() {
                     label="Email ✳"
                     type="email"
                     value={form.email}
-                    onChange={(v) => setForm({ ...form, email: v })}
+                    onChange={(v) => updateForm({ ...form, email: v })}
                     error={touched ? errors.email : ""}
                     placeholder="jane@company.com"
                     autoComplete="email"
@@ -200,7 +243,7 @@ export default function Contact() {
                         key={r}
                         type="button"
                         whileTap={{ scale: 0.94 }}
-                        onClick={() => setForm({ ...form, reason: form.reason === r ? "" : r })}
+                        onClick={() => updateForm({ ...form, reason: form.reason === r ? "" : r })}
                         aria-pressed={form.reason === r}
                         className={cn(
                           "border px-4 py-2.5 font-mono text-[0.64rem] tracking-[0.14em] uppercase transition-all duration-300",
@@ -219,7 +262,7 @@ export default function Contact() {
                   <Field
                     label="Message ✳"
                     value={form.message}
-                    onChange={(v) => setForm({ ...form, message: v })}
+                    onChange={(v) => updateForm({ ...form, message: v })}
                     error={touched ? errors.message : ""}
                     placeholder="Tell me about the role, the product or the idea…"
                     textarea
@@ -230,6 +273,7 @@ export default function Contact() {
                   <button
                     ref={sendRef}
                     type="submit"
+                    disabled={sent === "sending"}
                     onMouseEnter={() => setCursor({ variant: "hidden" })}
                     onMouseLeave={() => setCursor({ variant: "default" })}
                     className="group relative inline-flex min-w-[220px] items-center justify-center gap-3 overflow-hidden bg-ink px-8 py-4 font-mono text-[0.7rem] tracking-[0.2em] text-bg uppercase"
@@ -244,9 +288,11 @@ export default function Contact() {
                         transition={{ duration: 0.3 }}
                         className="relative z-10 flex items-center gap-3 group-hover:text-black"
                       >
-                        {sent === "email" ? (
+                        {sent === "sending" ? (
+                          <>Sending message…</>
+                        ) : sent === "email" ? (
                           <>
-                            <TbCheck className="h-4 w-4" aria-hidden /> Mail app opened
+                            <TbCheck className="h-4 w-4" aria-hidden /> Message sent
                           </>
                         ) : (
                           <>
@@ -259,7 +305,8 @@ export default function Contact() {
 
                   <button
                     type="button"
-                    onClick={() => compose("whatsapp")}
+                    disabled={sent === "sending"}
+                    onClick={() => void compose("whatsapp")}
                     {...hoverLink}
                     className="inline-flex items-center gap-3 border border-linestrong px-6 py-4 font-mono text-[0.7rem] tracking-[0.2em] text-ink uppercase transition-colors hover:border-[#25D366] hover:text-[#25D366]"
                   >
@@ -267,6 +314,20 @@ export default function Contact() {
                     {sent === "whatsapp" ? "WhatsApp opened" : "Send via WhatsApp"}
                   </button>
                 </div>
+
+                <AnimatePresence>
+                  {sent === "error" && (
+                    <motion.p
+                      role="alert"
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="mt-5 font-mono text-[0.62rem] tracking-[0.12em] text-coral uppercase"
+                    >
+                      {sendError ?? "Message couldn’t be sent. Please try again."}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
 
                 <AnimatePresence>
                   {touched && !valid && (
