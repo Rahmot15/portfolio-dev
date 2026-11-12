@@ -15,7 +15,6 @@ import { FitText } from "@/components/ui/fit-text";
 import { Counter } from "@/components/ui/reveal";
 import { TechTile } from "@/components/ui/tech-icon";
 import { codeLines, profile, roles } from "@/data/profile";
-import { projects } from "@/data/projects";
 import { findTech, technologies } from "@/data/skills";
 import { useMagnetic, useScramble } from "@/lib/hooks";
 import { Link } from "@/lib/router";
@@ -25,7 +24,7 @@ const ease: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 const stats = [
   { value: 2, suffix: "+", label: "Years of building" },
-  { value: projects.length, suffix: "", label: "Live full-stack projects" },
+  { value: 24, suffix: "+", label: "Live full-stack projects" },
   { value: technologies.length, suffix: "", label: "Technologies & tools" },
   { value: 100, suffix: "%", label: "Self-taught" },
 ];

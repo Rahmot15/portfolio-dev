@@ -3,7 +3,7 @@ import PersonJsonLd from "@/components/seo/person-json-ld";
 import HomePage from "@/components/pages/home-page";
 
 export const metadata: Metadata = {
-  title: "Full Stack Web Developer · Next.js & TypeScript",
+  title: "Rahmatullah · Full Stack Web Developer",
   description:
     "Explore the portfolio of MD. Rahmatullah, a Bangladesh-based full-stack developer building responsive web applications with Next.js, TypeScript, Node.js, PostgreSQL, and MongoDB.",
   openGraph: {
