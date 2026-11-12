@@ -15,6 +15,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: project ? `${project.name} — Case study` : "Project not found",
     description: project?.summary ?? "",
+    openGraph: project
+      ? {
+          type: "article",
+          title: `${project.name} — Case study`,
+          description: project.summary,
+        }
+      : undefined,
+    twitter: project
+      ? {
+          card: "summary",
+          title: `${project.name} — Case study`,
+          description: project.summary,
+        }
+      : undefined,
   };
 }
 

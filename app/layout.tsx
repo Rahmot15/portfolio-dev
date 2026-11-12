@@ -4,11 +4,48 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "MD. Rahmatullah — Full Stack Web Developer",
-    template: "%s · MD. Rahmatullah",
+    default: "MD. Rahmatullah | Full Stack Web Developer",
+    template: "%s | MD. Rahmatullah",
   },
   description:
-    "Portfolio of MD. Rahmatullah, a self-taught full-stack web developer from Bangladesh building with Next.js, TypeScript, Node.js, PostgreSQL and MongoDB.",
+    "MD. Rahmatullah is a Bangladesh-based full-stack web developer building responsive web apps with Next.js, TypeScript, Node.js, PostgreSQL, and MongoDB.",
+  applicationName: "MD. Rahmatullah Portfolio",
+  authors: [{ name: "MD. Rahmatullah" }],
+  creator: "MD. Rahmatullah",
+  publisher: "MD. Rahmatullah",
+  category: "technology",
+  keywords: [
+    "MD. Rahmatullah",
+    "Full Stack Web Developer",
+    "Next.js Developer",
+    "React Developer",
+    "TypeScript",
+    "Node.js",
+    "Bangladesh",
+  ],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
+  icons: {
+    icon: "/projects/logo-web.png",
+    apple: "/projects/logo-web.png",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    siteName: "MD. Rahmatullah Portfolio",
+    title: "MD. Rahmatullah | Full Stack Web Developer",
+    description:
+      "Explore the portfolio and full-stack projects of MD. Rahmatullah, building with Next.js, TypeScript, Node.js, PostgreSQL, and MongoDB.",
+  },
+  twitter: {
+    card: "summary",
+    title: "MD. Rahmatullah | Full Stack Web Developer",
+    description:
+      "Explore the portfolio and full-stack projects of MD. Rahmatullah, a developer based in Bangladesh.",
+  },
 };
 
 export const viewport: Viewport = {
