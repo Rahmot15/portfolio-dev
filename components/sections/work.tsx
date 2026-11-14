@@ -105,7 +105,8 @@ function ProjectCard({ p, flip }: { p: Project; flip: boolean }) {
             <img
               src={p.cover}
               alt={`${p.name} — homepage screenshot`}
-              loading="lazy"
+              loading="eager"
+              decoding="async"
               className="h-full w-full object-cover object-top transition-transform duration-[1.4s] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-[1.04]"
             />
             <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/80 via-black/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
@@ -140,7 +141,7 @@ function ProjectCard({ p, flip }: { p: Project; flip: boolean }) {
             transition={{ duration: 1.1, delay: 0.35, ease }}
           >
             <div className="transition-transform duration-700 ease-[cubic-bezier(.16,1,.3,1)] group-hover:-translate-y-3">
-              <PhoneFrame src={p.mobile} alt={`${p.name} on mobile`} />
+            <PhoneFrame src={p.mobile} alt={`${p.name} on mobile`} loading="eager" />
             </div>
           </motion.div>
         )}

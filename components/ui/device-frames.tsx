@@ -36,15 +36,17 @@ export function PhoneFrame({
   src,
   alt,
   className,
+  loading = "lazy",
 }: {
   src: string;
   alt: string;
   className?: string;
+  loading?: "eager" | "lazy";
 }) {
   return (
     <div className={cn("elev rounded-[1.6rem] bg-[#0b0a09] p-[5px] ring-1 ring-linestrong", className)}>
       <div className="relative aspect-[390/844] overflow-hidden rounded-[1.25rem] bg-surface2">
-        <img src={src} alt={alt} loading="lazy" className="h-full w-full object-cover object-top" />
+        <img src={src} alt={alt} loading={loading} decoding="async" className="h-full w-full object-cover object-top" />
         <span className="absolute top-1.5 left-1/2 h-[9px] w-[34%] -translate-x-1/2 rounded-full bg-[#0b0a09]" />
       </div>
     </div>
