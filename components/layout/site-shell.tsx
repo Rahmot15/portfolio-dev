@@ -51,9 +51,7 @@ function ShellContent({ children }: { children: ReactNode }) {
           </motion.div>
         )}
       </AnimatePresence>
-      <AnimatePresence mode="wait" initial={false}>
-        <PageShell key={pathname}>{children}</PageShell>
-      </AnimatePresence>
+      <PageShell key={pathname}>{children}</PageShell>
       <Footer />
     </div>
   );

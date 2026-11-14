@@ -1,8 +1,8 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { profile } from "@/data/profile";
 import { getProject } from "@/data/projects";
 
@@ -16,30 +16,48 @@ function labelFor(pathname: string) {
 }
 
 /**
- * Wraps every route. On navigation the old page's curtain slides up from the
- * bottom (exit), then the new page mounts and its curtain lifts away (enter).
- * The page itself is never transformed, so `position: fixed` children stay intact.
+ * Covers each newly mounted route with a short curtain reveal. The page itself
+ * is never transformed, so `position: fixed` children stay intact.
  */
 export function PageShell({ children }: { children: ReactNode }) {
+  const [showCurtain, setShowCurtain] = useState(true);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    // Ensure the overlay cannot remain over a cached Back/Forward navigation
+    // if the browser skips or interrupts the Motion animation lifecycle.
+    const dismiss = () => setShowCurtain(false);
+    const dismissAfterRestore = (event: PageTransitionEvent) => {
+      if (event.persisted) dismiss();
+    };
+    const fallback = window.setTimeout(dismiss, reduceMotion ? 100 : 1800);
+    window.addEventListener("popstate", dismiss);
+    window.addEventListener("pageshow", dismissAfterRestore);
+
+    return () => {
+      window.clearTimeout(fallback);
+      window.removeEventListener("popstate", dismiss);
+      window.removeEventListener("pageshow", dismissAfterRestore);
+    };
+  }, [reduceMotion]);
+
   return (
-    <motion.div initial="initial" animate="enter" exit="exit">
+    <div>
       {children}
-      <Curtain />
-    </motion.div>
+      {showCurtain && <Curtain reduceMotion={reduceMotion} />}
+    </div>
   );
 }
 
-function Curtain() {
+function Curtain({ reduceMotion }: { reduceMotion: boolean | null }) {
   const pathname = usePathname();
   return (
     <motion.div
       aria-hidden
       className="pointer-events-none fixed inset-0 z-[180] flex flex-col justify-between bg-bgsoft p-6 sm:p-10"
-      variants={{
-        initial: { y: "0%" },
-        enter: { y: "-100%", transition: { duration: 0.85, delay: 0.12, ease } },
-        exit: { y: ["100%", "0%"], transition: { duration: 0.65, ease } },
-      }}
+      initial={{ y: "0%" }}
+      animate={{ y: "-100%" }}
+      transition={{ duration: reduceMotion ? 0 : 0.85, delay: reduceMotion ? 0 : 0.12, ease }}
     >
       <div className="flex items-center justify-between font-mono text-[0.62rem] tracking-[0.28em] text-muted uppercase">
         <span>{profile.name}</span>
