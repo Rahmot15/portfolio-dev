@@ -96,10 +96,10 @@ function ProjectCard({ p, flip }: { p: Project; flip: boolean }) {
       {/* screenshot */}
       <div className="relative lg:col-span-7 [direction:ltr]">
         <motion.div
-          initial={reduce ? { opacity: 0 } : { clipPath: "inset(0 0 100% 0)" }}
+          initial={reduce ? false : { clipPath: "inset(0 0 100% 0)" }}
           whileInView={{ opacity: 1, clipPath: "inset(0 0 0% 0)" }}
-          viewport={{ once: true, margin: "-15%" }}
-          transition={{ duration: 1.1, ease: [0.76, 0, 0.24, 1] }}
+          viewport={{ once: true, margin: "600px 0px" }}
+          transition={{ duration: reduce ? 0 : 1.1, ease: [0.76, 0, 0.24, 1] }}
         >
           <BrowserFrame domain={p.domain}>
             <img
@@ -135,10 +135,10 @@ function ProjectCard({ p, flip }: { p: Project; flip: boolean }) {
         {p.mobile && (
           <motion.div
             className={cn("absolute -bottom-8 hidden w-[19%] min-w-[92px] sm:block", flip ? "-left-4" : "-right-4")}
-            initial={{ opacity: 0, y: 50, rotate: flip ? -8 : 8 }}
+            initial={reduce ? false : { opacity: 0, y: 50, rotate: flip ? -8 : 8 }}
             whileInView={{ opacity: 1, y: 0, rotate: flip ? -3 : 3 }}
-            viewport={{ once: true, margin: "-15%" }}
-            transition={{ duration: 1.1, delay: 0.35, ease }}
+            viewport={{ once: true, margin: "600px 0px" }}
+            transition={{ duration: reduce ? 0 : 1.1, delay: reduce ? 0 : 0.35, ease }}
           >
             <div className="transition-transform duration-700 ease-[cubic-bezier(.16,1,.3,1)] group-hover:-translate-y-3">
             <PhoneFrame src={p.mobile} alt={`${p.name} on mobile`} loading="eager" />
